@@ -10,7 +10,7 @@ services:
     ports:
       - "8000:8000"
     environment:
-      - AWS_REGION=us-east-1
+      - AWS_REGION=eu-west-2
       - BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20240620-v1:0
       # Route internal HTTP traffic safely within the Docker bridge network
       - ACCOUNT_SERVICE_URL=http://mock-account-service:8001/v1/credits
