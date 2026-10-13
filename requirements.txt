@@ -1,0 +1,25 @@
+# Package dependencies file
+
+# framework library, used to build the API endpoints. We use it to define the routes, handle HTTTP requests and automaictally generates API documentation 
+fastapi==0.111.0
+
+# ASGI (Asynchronous Server Gateway Interface) web server implementation, runs FastAPI app. FastAPI cannot listen for incoming network taffic, this library acts as the engine which serves the API to front end.
+uvicorn==0.30.1
+
+# data validation library. It ensures that data entering and leaving the API matches the exact structure and data types we expect.
+pydantic==2.7.4
+
+# foundation library for langchain, it provides the core abstractions, interfaces, schemas (like prompots, LLMs, and chat messages) used to build applications powered by LLMs
+langchain-core==0.2.10
+
+# an extension pack built to connect LangChain application to AWS. It allows code to interact with AWS Bedrock (to run models like Claude).
+langchain-aws==0.1.8
+
+# used to make HTTP requests to external APIs. requests handles the outbound network traffic.
+requests==2.32.3
+
+# security utility library. It reads key value pairs from a .env file and sets them as env variables.
+python-dotenv==1.0.1
+
+# how all these fit together?
+# We use python-dotenv to load AWS credentials. When a customer sends a payload to fastapi endpoint (run by uvicorn), pydantic validates that the customer's input is correct. Code then passes that clean data to langchain-core and langchain-aws to generate an AI response from Amazon Bedrock. If the AI needs external data, requests fetches it from the web before delivering the final answer back to the customer.

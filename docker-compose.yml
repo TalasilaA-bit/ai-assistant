@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # 1. The Main AI Gateway Assistant
+  ai-assistant:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: ai_assistant
+    ports:
+      - "8000:8000"
+    environment:
+      - AWS_REGION=us-east-1
+      - BEDROCK_MODEL_ID=anthropic.claude-3-5-sonnet-20240620-v1:0
+      # Route internal HTTP traffic safely within the Docker bridge network
+      - ACCOUNT_SERVICE_URL=http://mock-account-service:8001/v1/credits
+      - TRANSACTION_SERVICE_URL=http://mock-transaction-service:8002/v1/invoices
+      - INTERNAL_API_KEY=local-dev-secret-key
+      # Pass host machine's AWS credentials securely into the container
+      - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+      - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+      - AWS_SESSION_TOKEN=${AWS_SESSION_TOKEN}
+    networks:
+      - backofficesys-internal-net
+    depends_on:
+      - mock-account-service
+      - mock-transaction-service
+
+  # 2. Simulated Account Microservice
+  mock-account-service:
+    image: python:3.11-slim
+    container_name: mock_account_ms
+    command: >
+      sh -c "pip install fastapi uvicorn && python /app/mock_services/mock_account.py"
+    ports:
+      - "8001:8001"
+    volumes:
+      - ./mock_services:/app/mock_services
+    networks:
+      - backofficesys-internal-net
+
+  # 3. Simulated TRANSACTION Microservice
+  mock-transaction-service:
+    image: python:3.11-slim
+    container_name: mock_transaction_ms
+    command: >
+      sh -c "pip install fastapi uvicorn && python /app/mock_services/mock_transaction.py"
+    ports:
+      - "8002:8002"
+    volumes:
+      - ./mock_services:/app/mock_services
+    networks:
+      - backofficesys-internal-net
+
+networks:
+  backofficesys-internal-net:
+    driver: bridge
